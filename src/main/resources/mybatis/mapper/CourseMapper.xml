@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.select.SelectCourse.mapper.CourseMapper">
+    <select id="getAllCourse" resultType="com.select.SelectCourse.entity.Course">
+        select * from course.course;
+    </select>
+
+    <delete id="removeCourseById" parameterType="java.lang.Integer">
+        delete from course.course where cid = #{cid};
+    </delete>
+
+    <insert id="insertCourse" parameterType="com.select.SelectCourse.entity.Course">
+        insert into course.course
+        (name,score,startlesson,endlesson,startweek,endweek)
+        values (#{name},#{score},#{startLesson},#{endLesson},#{startWeek},#{endWeek})
+    </insert>
+
+    <select id="getCourseByName" parameterType="java.lang.String" resultType="com.select.SelectCourse.entity.Course">
+        select * from course.course
+        where  name = #{Name};
+    </select>
+
+    <update id="modifyCourse" parameterType="com.select.SelectCourse.entity.Course">
+        update course.course
+        set name = #{Name}, score = #{score} , startlesson = #{startLesson},
+            endlesson = #{endLesson}, startweek = #{startWeek}, endweek = #{endWeek}
+        where cid = #{cid};
+    </update>
+
+    <select id="getCourseById" parameterType="java.lang.Integer" resultType="com.select.SelectCourse.entity.Course">
+        select * from course.course where cid = #{cid};
+    </select>
+
+</mapper>

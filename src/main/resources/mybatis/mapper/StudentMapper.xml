@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.select.SelectCourse.mapper.StudentMapper">
+
+    <select id="getAllStudent" resultType="com.select.SelectCourse.entity.Student">
+        select *
+        from course.student;
+    </select>
+
+    <insert id="insertStudent" parameterType="com.select.SelectCourse.entity.Student">
+        insert into course.student (sid, sname, grade, classMsg)
+        values (#{sId}, #{sName}, #{Grade}, #{classMsg});
+    </insert>
+
+    <delete id="removeStudent" parameterType="java.lang.String">
+        delete from course.student where sname = #{sName};
+    </delete>
+
+    <update id="modifyStudent" parameterType="com.select.SelectCourse.entity.Student">
+        update course.student
+        set sname = #{sName}, grade = #{Grade}, classmsg = #{classMsg}
+        where sid = #{sId};
+    </update>
+
+    <select id="getStudentByName" parameterType="java.lang.String" resultType="com.select.SelectCourse.entity.Student">
+        select * from course.student where sname = #{name};
+    </select>
+
+    <select id="getStudentById" parameterType="java.lang.Integer" resultType="com.select.SelectCourse.entity.Student">
+        select * from course.student where sid = #{sId};
+    </select>
+
+</mapper>

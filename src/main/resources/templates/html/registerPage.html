@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>register</title>
+    <meta charset="utf-8">
+    <link href="../css/style.css" rel='stylesheet' th:href="@{/css/style.css}" type='text/css' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="application/x-javascript">addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false);
+    function hideURLbar(){ window.scrollTo(0,1); }
+    </script>
+    <script src="../../static/js/jquery-3.6.0.js" th:src="@{/js/jquery-3.6.0.js}"> </script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<!-----start-main---->
+<div class="main" >
+    <div class="login-form">
+        <h1>注册界面</h1>
+        <div class="head">
+        </div>
+        <form id="register" method="post" onsubmit="return false">
+            <input id="uname" type="text" class="text" placeholder="name:" onfocus="this.value = '';"
+                   onblur="if (this.value == '') {this.value = 'name';}" >
+            <input id="password" type="password" placeholder="password:" onfocus="this.value = '';"
+                   onblur="if (this.value == '') {this.value = 'password:';}">
+            <input id="ConfirmPassword" type="password" placeholder="ConfirmPassword:" onfocus="this.value = '';"
+                   onblur="if (this.value == '') {this.value = 'ConfirmPassword:';}">
+
+            <div class="submit">
+                <input type="submit"value="注册" onclick="function register() {
+
+                    let url = 'http://localhost:8888/register';
+                    let uname = document.getElementById('uname').value;
+		            let password = document.getElementById('password').value;
+		            let ConfirmPassword = document.getElementById('ConfirmPassword').value;
+
+		            if (uname == null || uname == ''){
+		                alert('用户名不能为空')
+		            }else if (password == null || password == '' || ConfirmPassword == null || ConfirmPassword == ''){
+		                alert('密码不能为空')
+		            }else if(password != ConfirmPassword){
+		                alert('两次密码不同')
+		            }else{
+		                $.ajax({
+		                    url: url,
+		                    method: 'post',
+			                dataType: 'json',
+			                contentType:'application/x-www-form-urlencoded;  charset=UTF-8',
+			                header: {
+                                'Content-Type': 'application/json;charset=utf8'
+			                },
+			                data: {
+			                    uname: uname,
+			                    password: password
+			                },
+			                success: function (res){
+		                        if (res != 'false'){
+		                            Swal.fire({
+                                        title: '注册成功',
+                                        text: '请进行登录操作',
+                                        icon: 'success',
+                                        confirmButtonText: '确定',
+                                        allowOutsideClick: false
+                                    }).then(function (isConfirm){
+                                        if (isConfirm){
+                                            window.location.replace('http://localhost:8888/')
+                                        }
+                                    })
+		                        }else{
+		                            Swal.fire({
+		                                title: '注册失败',
+                                        text: '用户已存在',
+                                        icon: 'error',
+                                        confirmButtonText: '确定',
+                                        allowOutsideClick: false
+		                            })
+		                        }
+			                },
+			                error: function (res){
+		                        alert(res)
+			                }
+		                })
+		            }
+                } register()" />
+            </div>
+            <p>
+                <a href="/">登录</a>
+            </p>
+        </form>
+    </div>
+    <!--//End-login-form-->
+    <!-----start-copyright---->
+    <div class="copy-right">
+    </div>
+    <!-----//end-copyright---->
+</div>
+<!-----//end-main---->
+
+<div style="display:none"><script src='http://v7.cnzz.com/stat.php?id=155540&web_id=155540' language='JavaScript' charset='gb2312'></script></div>
+</body>
+</html>

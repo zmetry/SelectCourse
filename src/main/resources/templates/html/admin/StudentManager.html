@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script th:src="@{/js/sweetalert2.all.js}"></script>
+    <title>学生管理界面</title>
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="../css/dashboard.css" th:href="@{/css/dashboard.css}" rel="stylesheet">
+    <script src="../../../static/js/jquery-3.6.0.js" th:src="@{/js/jquery-3.6.0.js}"></script>
+    <style type="text/css">
+        /* Chart.js */
+
+        .menuitem {
+            position: relative;
+            float: left;
+            margin-right: 4em;
+        }
+
+        .menuitem .submenu {
+            position: absolute;
+            top: 38px;
+        }
+
+        /** 下面的控制显示和隐藏 **/
+        .menuitem .submenu {
+            display: none;
+        }
+
+        .menuitem:hover .submenu {
+            display: block;
+        }
+
+        @-webkit-keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+            to {
+                opacity: 1
+            }
+        }
+
+        @keyframes chartjs-render-animation {
+            from {
+                opacity: 0.99
+            }
+            to {
+                opacity: 1
+            }
+        }
+
+        .chartjs-render-monitor {
+            -webkit-animation: chartjs-render-animation 0.001s;
+            animation: chartjs-render-animation 0.001s;
+        }
+    </style>
+    <script th:inline="javascript">
+
+        function delStu(obj){
+            let sname = $(obj).data('sname');
+            Swal.fire({
+                title: '警告',
+                text: '是否删除该名学生',
+                confirmButtonText: '确认',
+                showCancelButton: 'true',
+                cancelButtonText: '取消',
+                icon: 'warning',
+                allowOutsideClick: false,
+                reverseButtons: true,
+                showCloseButton: true
+            }).then(function (isConfirm){
+                if (isConfirm.value){
+                    $.ajax({
+                        url: 'http://localhost:8888/admin/userList/deleteStu/'+sname,
+                        method: 'POST',
+                        dataType: 'json',
+                        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                        header: {
+                            'Content-Type': 'application/json;charset=utf8'
+                        },
+                        success: function (res){
+                            if (res != 'false'){
+                                Swal.fire({
+                                    title: '删除该学生成功',
+                                    text: '即将刷新',
+                                    icon: 'sucess',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false,
+                                    showCancelButton: false
+                                }).then(function (isConfirm){
+                                    if (isConfirm){
+                                        location.reload();
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+        function modifyStu(obj){
+            //获取数据
+            var sid = $(obj).data('sid');
+            let sname = $(obj).data('sname');
+            let grade = $(obj).data('grade');
+            let classmsg = $(obj).data('classmsg');
+
+            Swal.fire({
+                title: '请输入要更改的信息',
+                icon: 'info',
+                html:
+                    '<br/>'
+                    +'姓名：<input id="sname" placeholder="' + sname + '" class="modify-stu"> <br/><br/>'
+                    + '年级：<input id="grade" placeholder="' + grade + '" class="modify-stu"> <br/> <br/>'
+                    + '班级：<input id="classMsg" placeholder="' + classmsg + '" class="modify-stu"> <br/> <br/>',
+                confirmButtonText: '提交',
+                allowOutsideClick: false,
+                reverseButtons: true,
+                showCloseButton: true
+            }).then(function (isConfirm){
+                if (isConfirm.value){
+                    let _sname = (document.getElementById('sname').value.length == 0 ? sname:document.getElementById('sname').value);
+                    let _grade = (document.getElementById('grade').value.length == 0? grade:document.getElementById('grade').value);
+                    let _classMsg = (document.getElementById('classMsg').value.length == 0? classmsg:document.getElementById('classMsg').value);
+
+                    //进行修改
+                    $.ajax({
+                        url: 'http://localhost:8888/admin/modifystu',
+                        method: 'POST',
+                        dataType: 'json',
+                        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                        header: {
+                            'Content-Type': 'application/json;charset=utf8'
+                        },
+                        data:{
+                            sid:sid,
+                            sname: _sname,
+                            grade: _grade,
+                            classmsg: _classMsg
+                        },
+                        success: (res)=>{
+                            if (res == 'true'){
+                                Swal.fire({
+                                    title: '修改学生信息成功',
+                                    text: '即将刷新',
+                                    icon: 'sucess',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false,
+                                    showCancelButton: false
+                                }).then(function (isConfirm){
+                                    if (isConfirm){
+                                        location.reload();
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+        function insertStu(){
+            Swal.fire({
+                title: '请输入要添加的学生信息',
+                icon: 'info',
+                html:
+                    '<br/>'
+                    +'姓名：<input id="sname" class="insert-stu"> <br/><br/>'
+                    + '年级：<input id="grade" class="insert-stu"> <br/> <br/>'
+                    + '班级：<input id="classMsg" class="insert-stu"> <br/> <br/>',
+                confirmButtonText: '添加',
+                allowOutsideClick: false,
+                reverseButtons: true,
+                showCloseButton: true
+            }).then((isConfirm)=>{
+                if (isConfirm.value){
+                    let sname = document.getElementById('sname').value;
+                    let grade = document.getElementById('grade').value;
+                    let classMsg = document.getElementById('classMsg').value;
+                    //ajax提交
+                    $.ajax({
+                        url: 'http://localhost:8888/admin/insertStu',
+                        method: 'POST',
+                        dataType: 'json',
+                        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                        header: {
+                            'Content-Type': 'application/json;charset=utf8'
+                        },
+                        data:{
+                            sname: sname,
+                            grade: grade,
+                            classmsg: classMsg
+                        },
+                        success: (res)=>{
+                            if (res == 'true'){
+                                Swal.fire({
+                                    title: '添加学生信息成功',
+                                    text: '即将刷新',
+                                    icon: 'sucess',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false,
+                                    showCancelButton: false
+                                }).then(function (isConfirm){
+                                    if (isConfirm){
+                                        location.reload();
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+        function exit(){
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'center',
+                showConfirmButton: false,
+                timer: 900,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            })
+
+            Toast.fire({
+                icon: 'success',
+                title: '成功退出'
+            }).then(()=>{
+                $.ajax({
+                    url: 'http://localhost:8888/logout',
+                    method: 'post',
+                    dataType: 'json',
+                    contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                    header: {
+                        'Content-Type': 'application/json;charset=utf8'
+                    },
+                    success: (res)=>{
+                        window.location.href = 'http://localhost:8888/' + res
+                    }
+                })
+            })
+        }
+
+        function isEmail(strEmail) {
+            if (strEmail.search(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/) != -1)
+                return true;
+            else
+                return false;
+        }
+
+        function changeMail(obj){
+
+            let uname = $(obj).data('uname');
+            let email = $(obj).data('email');
+
+            Swal.fire({
+                title: '邮箱修改',
+                html: '新邮箱：<input id="newEmail" placeholder="' + email + '">',
+                confirmButtonText: '确定',
+                allowOutsideClick: false,
+                showCancelButton: false,
+                showCloseButton: true
+            }).then((isConfirm)=>{
+                if (isConfirm.value){
+                    let email = document.getElementById('newEmail').value;
+
+                    if (isEmail(email)){
+                        $.ajax({
+                            url: 'http://localhost:8888/user/changeMail',
+                            method: 'POST',
+                            dataType: 'json',
+                            contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                            header: {
+                                'Content-Type': 'application/json;charset=utf8'
+                            },
+                            data:{
+                                uname: uname,
+                                email: email
+                            },
+                            success:(res)=>{
+                                if (res == 'true'){
+                                    const Toast = Swal.mixin({
+                                        toast: true,
+                                        position: 'center',
+                                        showConfirmButton: false,
+                                        timer: 900,
+                                        timerProgressBar: true,
+                                        didOpen: (toast) => {
+                                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                        }
+                                    })
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: '修改邮箱成功'
+                                    }).then(()=>{
+                                        location.reload()
+                                    })
+                                }
+                            }
+                        })
+                    }else {
+                        alert('邮箱格式不正确');
+                        changeMail(obj)
+                    }
+                }
+            })
+        }
+
+    </script>
+
+
+</head>
+
+<body>
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" th:href="@{https://www.dlut.edu.cn/}">大连理工大学</a>
+    <input class="form-control form-control-dark w-100" id="SearchLabel"
+           type="text" placeholder="Search" aria-label="Search" onkeydown="function enter (){
+
+				   	let baseUrl = 'https://www.baidu.com/s?wd=';
+				   	let text = document.getElementById('SearchLabel').value;
+					let url = baseUrl + text;
+					let theEvent = window.event || event;
+					let code = theEvent.keyCode || theEvent.which;
+					if (code == 13){
+						window.open(url);
+					}
+					} enter()">
+    <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+            <ul class="menuitem" style="display:inline;">
+                <span class="nav-link" style="text-align: center;">
+                     &emsp; &emsp;姓名：[[${session.user.uname}]]
+                </span>
+                <div class="row">
+                    <ul class="submenu dropdown-menu">
+                        <li><a href="javascript:void(0);" th:data-uname="${session.user.uname}"
+                               th:data-email="${session.mail}"
+                               onclick="changeMail(this)" th:text="${session.mail!=null?session.mail:''}"></a></li>
+                        <li>
+                            <a href="javascript:void(0);" style="display: inline;"
+                               type="button" onclick="exit()">
+                                &emsp;&emsp;&emsp;&emsp;退出&emsp;&emsp;&emsp;&emsp;
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/MainPage}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            首页 <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <!--这里写标签和相应的页面跳转-->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/MainPage/CourseList}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            以开放课程信息 <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <!--管理员操作菜单-->
+                <div th:if="${session.user.power == 1}">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>管理操作</span>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/admin/userList/3}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                学生管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/userList/2}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                老师管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/courseManager}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                选课信息管理
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+            <br />
+            <h2 style="display:inline;">本学期所有的学生信息如下</h2>
+
+            <button style="float: right" type="button" class="btn btn-info" onclick="insertStu()">添加学生</button>
+
+            <br />
+            <br />
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th>学生学号</th>
+                        <th>姓名</th>
+                        <th>年级</th>
+                        <th>班级</th>
+                        <th>&emsp;&emsp;操作</th>
+                    </tr>
+                    </thead>
+                    <tbody th:each="info : ${session.studentList}">
+                    <tr>
+                        <td th:text="${info.SId}"></td>
+                        <td th:text="${info.getSName()}"></td>
+                        <td th:text="${info.grade}"></td>
+                        <td th:text="${info.classMsg}"></td>
+                        <td>
+                            <button style="display: inline" th:data-sname="${info.SName}" onclick="delStu(this)">删除</button>
+                            &nbsp;&nbsp;
+                            <button style="display: inline" th:data-sid="${info.SId}" th:data-sname="${info.SName}"
+                                    th:data-grade="${info.grade}" th:data-classmsg="${info.classMsg}"
+                                    onclick="modifyStu(this)">修改</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script type="text/javascript" src="asserts/js/jquery-3.2.1.slim.min.js"></script>
+<script type="text/javascript" src="asserts/js/popper.min.js"></script>
+<script type="text/javascript" src="asserts/js/bootstrap.min.js"></script>
+
+<!-- Icons -->
+<script type="text/javascript" src="asserts/js/feather.min.js"></script>
+<script>
+    feather.replace()
+</script>
+
+<!-- Graphs -->
+<script type="text/javascript" src="asserts/js/Chart.min.js"></script>
+<script>
+    var ctx = document.getElementById("myChart");
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            datasets: [{
+                data: [15339, 21345, 18483, 24003, 23489, 24092, 12034],
+                lineTension: 0,
+                backgroundColor: 'transparent',
+                borderColor: '#007bff',
+                borderWidth: 4,
+                pointBackgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: false
+                    }
+                }]
+            },
+            legend: {
+                display: false,
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

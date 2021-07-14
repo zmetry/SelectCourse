@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+
+<head>
+    <title>login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+    <script type="application/x-javascript">addEventListener("load", function () {
+        setTimeout(hideURLbar, 0);
+    }, false);
+
+    function hideURLbar() {
+        window.scrollTo(0, 1);
+    }
+
+    </script>
+    <script src="../../static/js/jquery-3.6.0.js" th:src="@{/js/jquery-3.6.0.js}"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script th:inline="javascript">
+
+        function isEmail(strEmail) {
+            if (strEmail.search(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/) != -1)
+                return true;
+            else
+                return false;
+        }
+
+        function changePwd(uname,pwd){
+            console.log("changePwd函数内部")
+            $.ajax({
+                url: 'http://localhost:8888/login/changePwd',
+                method: 'post',
+                dataType: 'json',
+                contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                header: {
+                    'Content-Type': 'application/json;charset=utf8'
+                },
+                data: {
+                    uname: uname,
+                    pwd: pwd
+                },
+                success:(res)=>{
+                    if (res == 'true'){
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'center',
+                            showConfirmButton: false,
+                            timer: 900,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener('mouseenter', Swal.stopTimer)
+                                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                            }
+                        })
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: '成功修改密码'
+                        }).then(()=>{
+                            $.ajax({
+                                url: 'http://localhost:8888/logout',
+                                method: 'post',
+                                dataType: 'json',
+                                contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                                header: {
+                                    'Content-Type': 'application/json;charset=utf8'
+                                },
+                                success: (res)=>{
+                                    window.location.href = 'http://localhost:8888/' + res
+                                }
+                            })
+                        })
+
+                    }else{
+                        Swal.fire({
+                            title: '错误',
+                            text: '修改密码错误',
+                            icon: 'error',
+                            confirmButtonText: '确定',
+                            allowOutsideClick: false,
+                            showCloseButton: true
+                        }).then(()=>{
+                            findPwd();
+                        })
+                    }
+                }
+            })
+        }
+
+        function checkNum(uname){
+            console.log('开始进入密码')
+            Swal.fire({
+                title: '请输入密码',
+                html: '密码：<input id="firstPassword" type="password">' +
+                    '确认密码：<input id="confirmPassword" type="password">',
+                showCloseButton: true,
+                confirmButtonText: '确定'
+            }).then(()=>{
+                let pwd = document.getElementById('firstPassword').value;
+                let cpwd = document.getElementById('confirmPassword').value;
+                if (pwd == null || pwd == '' || cpwd == null || cpwd == ''){
+                    alert('输入的密码为空');
+                    checkNum(uname);
+                }else if (pwd != cpwd){
+                    alert('两次输入的密码不一样');
+                    checkNum(uname);
+                }else {
+                    console.log('开始修改密码')
+                    changePwd(uname,pwd);
+                }
+            })
+        }
+
+        function checkMail(uname){
+            Swal.fire({
+                title: '请输入邮箱',
+                html: '邮箱：<input id="mailText">',
+                showCloseButton: true,
+                confirmButtonText: '下一步',
+                showCloseButton: true
+            }).then(()=>{
+                let mail = document.getElementById('mailText').value;
+                if (isEmail(mail)){
+                    $.ajax({
+                        url: 'http://localhost:8888/login/checkMail',
+                        method: 'post',
+                        dataType: 'json',
+                        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                        header: {
+                            'Content-Type': 'application/json;charset=utf8'
+                        },
+                        data: {
+                            uname: uname,
+                            mail: mail
+                        },
+                        success: (res)=>{
+                            if (res != 'false'){
+
+                                let result;
+                                $.ajax({
+                                    url: 'http://localhost:8888' + res,
+                                    method: 'post',
+                                    dataType: 'json',
+                                    contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                                    header: {
+                                        'Content-Type': 'application/json;charset=utf8'
+                                    },
+                                    success: (res)=>{
+                                        result = res
+                                    }
+                                })
+
+                                Swal.fire({
+                                    title: '请输入验证码',
+                                    html: '验证码：<input id="checkNum">',
+                                    showCloseButton: true,
+                                    confirmButtonText: '下一步'
+                                }).then((isConfirm)=>{
+                                    if (isConfirm.value){
+                                        let cn = document.getElementById('checkNum').value;
+                                        if (cn == result){
+                                            checkNum(uname);
+                                        }else{
+                                            Swal.fire({
+                                                title: '错误',
+                                                text: '验证码错误',
+                                                icon: 'error',
+                                                confirmButtonText: '确定',
+                                                allowOutsideClick: false,
+                                                showCloseButton: true
+                                            }).then((isConfirm)=>{
+                                                if (isConfirm.value){
+                                                    checkMail(uname);
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
+                            }else{
+                                Swal.fire({
+                                    title: '错误',
+                                    text: '邮箱不存在',
+                                    icon: 'error',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false,
+                                    showCloseButton: true
+                                }).then((isConfirm)=>{
+                                   if (isConfirm.value){
+                                       findPwd();
+                                   }
+                                })
+                            }
+                        }
+                    })
+                }else{
+                    Swal.fire({
+                        title: '错误',
+                        text: '邮箱格式错误',
+                        icon: 'error',
+                        confirmButtonText: '确定',
+                        allowOutsideClick: false,
+                        showCloseButton: true
+                    }).then((isConfrim)=>{
+                        if (isConfrim.value){
+                            checkMail(uname);
+                        }
+                    })
+                }
+
+            })
+        }
+
+        function findPwd(){
+            Swal.fire({
+                title: '找回密码',
+                html: '用户名：<input id="user-name-label">',
+                showCloseButton: true,
+                confirmButtonText: '下一步'
+            }).then((isConfirm)=>{
+                if (isConfirm.value){
+                    let uname = document.getElementById('user-name-label').value;
+                    $.ajax({
+                        url: 'http://localhost:8888/login/checkUser',
+                        method: 'post',
+                        dataType: 'json',
+                        contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+                        header: {
+                            'Content-Type': 'application/json;charset=utf8'
+                        },
+                        data: {
+                            uname: uname
+                        },
+                        success: (res)=>{
+                            if (res == 'true'){
+                                checkMail(uname)
+                            }else {
+                                Swal.fire({
+                                    title: '错误',
+                                    text: '用户名错误',
+                                    icon: 'error',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false,
+                                    showCloseButton: true
+                                }).then((isConfirm)=>{
+                                    if (isConfirm.value){
+                                        findPwd();
+                                    }
+                                })
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+    </script>
+
+</head>
+
+<body>
+
+<!-----start-main---->
+<div class="main">
+    <div class="login-form">
+        <h1>登陆界面</h1>
+        <div class="head">
+        </div>
+        <form id="login" method="post" onsubmit="return false">
+            <input id="uname" name="uname" type="text" class="text" value="username" onfocus="this.value = '';"
+                   onblur="if (this.value == '') {this.value = 'username';}">
+            <input id="password" name="password" type="password" value="password" onfocus="this.value = '';"
+                   onblur="if (this.value == '') {this.value = 'password';}">
+            <div class="submit">
+                <input id="denglu" type="submit" value="登录" onclick="function denglu(){
+					let url = 'http://localhost:8888/login';
+                    let uname = document.getElementById('uname').value;
+		            let password = document.getElementById('password').value;
+		            $.ajax({
+			            url: url,
+			            method: 'post',
+			            dataType: 'json',
+			            contentType:'application/x-www-form-urlencoded; charset=UTF-8',
+			            header: {
+                            'Content-Type': 'application/json;charset=utf8'
+			            },
+			            data: {
+			              uname: uname,
+			              password: password
+			            },
+			            success: function (res){
+				            if (res != 'false'){
+                                Swal.fire({
+                                    title: '登录成功',
+                                    text: '即将跳转到主界面',
+                                    icon: 'success',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false
+                                }).then(function (isConfirm){
+                                    if (isConfirm){
+                                        window.location.replace('http://localhost:8888/MainPage')
+                                    }
+                                })
+				            }else{
+				                Swal.fire({
+                                    title: '登录失败',
+                                    text: '用户名或密码错误',
+                                    icon: 'error',
+                                    confirmButtonText: '确定',
+                                    allowOutsideClick: false
+                                })
+				            }
+			            }
+		            })
+				} denglu()"/>
+            </div>
+            <p>
+                <a href="/registerPage">注册</a>
+                <a href="javascript:void(0);" style="margin-left:50px" onclick="findPwd()">忘记密码？</a>
+            </p>
+        </form>
+    </div>
+    <!--//End-login-form-->
+</div>
+<!-----//end-main---->
+
+</body>
+
+</html>

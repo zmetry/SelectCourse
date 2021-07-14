@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.select.SelectCourse.mapper.MailMapper">
+
+    <select id="getMailById" parameterType="java.lang.Integer" resultType="java.lang.String">
+        select mail from course.mail where uid = #{uid};
+    </select>
+
+    <update id="changeMailById" parameterType="com.select.SelectCourse.entity.Email">
+        update course.mail set mail = #{mail} where uid = #{uid};
+    </update>
+
+</mapper>

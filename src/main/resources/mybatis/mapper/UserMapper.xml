@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.select.SelectCourse.mapper.UserMapper">
+
+    <select id="getAllUser" resultType="com.select.SelectCourse.entity.User">
+        select * from course.user;
+    </select>
+
+    <insert id="InsertUser" parameterType="com.select.SelectCourse.entity.User">
+        insert into course.user(uname,password,power) values (#{uname},#{password},#{power});
+    </insert>
+
+    <select id="getPower" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select power from course.user where uname = #{uname};
+    </select>
+
+    <select id="checkUser" parameterType="com.select.SelectCourse.entity.User" resultType="com.select.SelectCourse.entity.User">
+        select * from course.user where uname = #{uname} and password = #{password};
+    </select>
+
+    <select id="getUserByName" parameterType="java.lang.String" resultType="com.select.SelectCourse.entity.User">
+        select * from course.user where uname = #{uname};
+    </select>
+
+    <select id="getUserByPower" parameterType="java.lang.Integer" resultType="com.select.SelectCourse.entity.User">
+        select * from course.user where power = #{power};
+    </select>
+
+    <update id="modifyUname" parameterType="com.select.SelectCourse.entity.User">
+        update course.user
+        set uname = #{uname} where uid = #{uid};
+    </update>
+
+
+    <delete id="deleteUserByName" parameterType="java.lang.String">
+        delete from course.user where uname = #{uname};
+    </delete>
+
+    <update id="modifyPassword" parameterType="com.select.SelectCourse.entity.User">
+        update course.user set password = #{password} where uid = #{uid};
+    </update>
+
+</mapper>

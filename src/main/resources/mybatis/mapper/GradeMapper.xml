@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.select.SelectCourse.mapper.GradeMapper">
+
+    <select id="getGrade" resultType="com.select.SelectCourse.entity.Grade">
+        select * from course.grade
+        where cid = #{cid} and sid = #{sid} and tid = #{tid};
+    </select>
+
+    <insert id="insertGrade" parameterType="com.select.SelectCourse.entity.Grade">
+        insert into course.grade(cid,sid,tid,score)
+        values (#{cid},#{sid},#{tid},#{score});
+    </insert>
+
+    <update id="ModifyScore" parameterType="com.select.SelectCourse.entity.Grade">
+        update course.grade set score = #{score}
+        where cid = #{cid} and sid = #{sid} and tid = #{tid};
+    </update>
+
+    <delete id="deleteGrade" parameterType="com.select.SelectCourse.entity.Grade">
+        delete from course.grade
+        where cid = #{cid} and sid = #{sid} and tid = #{tid} and score = #{score};
+    </delete>
+
+</mapper>
